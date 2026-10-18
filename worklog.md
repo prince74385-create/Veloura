@@ -21,3 +21,21 @@ Work Log:
 Stage Summary:
 - Browser-verified end-to-end with agent-browser: hero renders, 8 product cards load, filters work, Quick View add-to-bag flow works, cart qty/subtotal correct, newsletter POST 200 with toast, zero console errors
 - Key artifacts: src/app/page.tsx, src/components/store/* (11 components), src/app/api/{products,products/[slug],newsletter}, prisma/schema.prisma, scripts/{generate-images.mjs,seed.ts}
+
+---
+Task ID: 2
+Agent: Z.ai Code (main orchestrator)
+Task: Make npm scripts cross-platform (Windows compatibility) — user reported tee/cp/NODE_ENV-prefix only work on Mac/Linux
+
+Work Log:
+- Identified 3 Windows-breaking patterns in package.json: `2>&1 | tee dev.log`, `cp -r` in build, `NODE_ENV=production bun ...` inline env prefix
+- Created scripts/dev.mjs — Node-based dev runner: spawns next dev via process.execPath + require.resolve('next/dist/bin/next') (no PATH dependency), tees stdout/stderr to dev.log via createWriteStream, handles SIGINT/SIGTERM
+- Created scripts/build.mjs — runs next build then copies static/public into standalone with cpSync (replaces cp -r)
+- Created scripts/start.mjs — sets NODE_ENV in-process, spawns .next/standalone/server.js, tees to server.log, guards missing build
+- Updated package.json: dev/build/start now `node scripts/*` (works with npm/pnpm/yarn/bun on Windows/macOS/Linux); db:* and lint unchanged (already cross-platform)
+- Restarted sandbox dev server with new script: node scripts/dev.mjs running, dev.log still written, homepage 200, API 200
+- Lint clean; agent-browser sanity check: all 15 images load, zero page errors
+
+Stage Summary:
+- Project is now fully cross-platform; Windows users run `npm install && npm run db:push && npm run dev`
+- Key artifacts: scripts/dev.mjs, scripts/build.mjs, scripts/start.mjs, package.json
