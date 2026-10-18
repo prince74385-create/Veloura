@@ -39,3 +39,18 @@ Work Log:
 Stage Summary:
 - Project is now fully cross-platform; Windows users run `npm install && npm run db:push && npm run dev`
 - Key artifacts: scripts/dev.mjs, scripts/build.mjs, scripts/start.mjs, package.json
+
+---
+Task ID: 2-b
+Agent: Z.ai Code (main orchestrator)
+Task: Confirm project is single-folder portable; fix hardcoded DATABASE_URL in .env
+
+Work Log:
+- Audited project root: everything lives in /home/z/my-project (single folder)
+- Found .env had absolute path DATABASE_URL=file:/home/z/my-project/db/custom.db — would break on any other machine
+- Changed to relative: DATABASE_URL=file:../db/custom.db (Prisma resolves relative to prisma/schema.prisma → <project>/db/custom.db on every OS)
+- Restarted dev server: /api/products returns same seeded data (same product ids), homepage 200 — data intact
+
+Stage Summary:
+- Project is fully portable in one folder; Windows user copies folder (minus node_modules/.next), runs npm install, db:push (optional), dev
+- .env now OS-independent
